@@ -2,7 +2,7 @@ import scipy as sp
 import numpy as np
 
 
-class MonteCarlo:
+class Enhanced:
 
     def __init__(self, object=None):
 

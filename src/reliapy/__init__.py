@@ -5,15 +5,15 @@ Reliapy
 
 import pkg_resources
 
-import reliapy.model
-import reliapy.approximative
+import reliapy.state_limit
+import reliapy.transfornation
 import reliapy.distributions
 import reliapy.monte_carlo
 
-From reliapy.model import *
-From reliapy.approximative import *
-From reliapy.distributions import *
-From reliapy.monte_carlo import *
+from reliapy.state_limit import *
+from reliapy.transfornation import *
+from reliapy.distributions import *
+from reliapy.monte_carlo import *
 
 try:
     __version__ = pkg_resources.get_distribution("reliapy").version
