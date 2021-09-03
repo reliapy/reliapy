@@ -1,4 +1,3 @@
+import reliapy.distributions.continuous
 
-#import reliapy.Model
-
-#from reliapy.Model import *
+from reliapy.distributions.continuous import *

@@ -7,13 +7,17 @@ import pkg_resources
 
 import reliapy.state_limit
 import reliapy.transfornation
-import reliapy.distributions
+import reliapy.distributions.continuous
 import reliapy.monte_carlo
+import reliapy._messages
+import reliapy.visualization
 
 from reliapy.state_limit import *
 from reliapy.transfornation import *
-from reliapy.distributions import *
+from reliapy.distributions.continuous import *
 from reliapy.monte_carlo import *
+from reliapy.visualization import *
+from reliapy._messages import *
 
 try:
     __version__ = pkg_resources.get_distribution("reliapy").version

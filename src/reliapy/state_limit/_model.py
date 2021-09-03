@@ -58,6 +58,8 @@ class StateLimit:
 
         if self.n_tasks == 1:
             self.g = self._run_serial(X)
+        else:
+            raise NotImplementedError('reliapy: multiprocessing not available yet.')
 
     def append(self, X=None):
         """
@@ -82,6 +84,8 @@ class StateLimit:
             for i in range(n_sim_append):
                 self.g.append(g_append[i])
                 self.X.append(X[i])
+        else:
+            raise NotImplementedError('reliapy: multiprocessing not available yet.')
 
         self.n_sim = self.n_sim + n_sim_append
 
