@@ -9,3 +9,7 @@ def type_error(var, type_var):
 def shape_error(var, shape_var):
     raise ValueError('reliapy (Error 2) - the shape of ' + var + ' is not consistent.')
 
+
+def not_implemented_error():
+    raise NotImplementedError('reliapy (Error 4) - this option is not implemented.')
+

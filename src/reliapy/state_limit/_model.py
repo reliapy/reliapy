@@ -2,13 +2,13 @@ import numpy as np
 # from multiprocessing import Pool
 
 
-class StateLimit:
+class LimitState:
     """
-    ``StateLimit`` is a class to implement the state limit equations.
+    ``LimitState`` is a class to implement the state limit equations.
 
     **Input:**
-    * **state_limit_function** (`callable`)
-        State limit function.
+    * **limit_state_function** (`callable`)
+        Limit state function.
 
     **Attributes:**
 
@@ -26,10 +26,10 @@ class StateLimit:
 
     """
 
-    def __init__(self, state_limit_function=None, n_tasks=1):
+    def __init__(self, limit_state_function=None, n_tasks=1):
 
-        if callable(state_limit_function):
-            self.state_limit_function = state_limit_function
+        if callable(limit_state_function):
+            self.state_limit_function = limit_state_function
         else:
             raise TypeError('reliapy: `state_limit_function` must be callable.')
 

@@ -18,6 +18,9 @@ class Normal(_Continuous):
     def cdf(self, X=None):
         return prob.cdf(X, loc=self.loc, scale=self.scale)
 
+    def icdf(self, y=None):
+        return prob.ppf(y, loc=self.loc, scale=self.scale)
+
     def moment(self, n=1):
         return prob.moment(n, loc=self.loc, scale=self.scale)
 

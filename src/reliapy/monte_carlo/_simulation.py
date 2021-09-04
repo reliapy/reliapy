@@ -5,8 +5,8 @@ from reliapy._messages import *
 
 class _Simulation:
 
-    def __init__(self, limit_state_obj=None, distributions=None, n_sim=None, n_tasks=1, random_state=None):
-        self.distributions = distributions
+    def __init__(self, limit_state_obj=None, distribution_obj=None, n_sim=None, n_tasks=1, random_state=None):
+        self.distribution_obj = distribution_obj
         self.n_sim = n_sim
         self.n_tasks = n_tasks
         self.limit_state_function = limit_state_obj

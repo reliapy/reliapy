@@ -17,6 +17,9 @@ class _Continuous:
     def cdf(self, X=None):
         template_error()
 
+    def icdf(self, X=None):
+        template_error()
+
     def moment(self, n=1):
         template_error()
 
