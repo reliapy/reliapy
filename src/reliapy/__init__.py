@@ -10,13 +10,11 @@ import reliapy.transformation
 import reliapy.distributions.continuous
 import reliapy.monte_carlo
 import reliapy._messages
-import reliapy.visualization
 
 from reliapy.state_limit import *
 from reliapy.transformation import *
 from reliapy.distributions.continuous import *
 from reliapy.monte_carlo import *
-from reliapy.visualization import *
 from reliapy._messages import *
 
 try:
