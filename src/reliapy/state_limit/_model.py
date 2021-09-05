@@ -1,4 +1,5 @@
 import numpy as np
+from reliapy.math import numerical_gradient
 # from multiprocessing import Pool
 
 
@@ -26,17 +27,38 @@ class LimitState:
 
     """
 
-    def __init__(self, limit_state_function=None, n_tasks=1):
+    def __init__(self, limit_state_function=None, limit_state_gradient=None, n_tasks=1):
 
         if callable(limit_state_function):
-            self.state_limit_function = limit_state_function
+            self.limit_state_function = limit_state_function
         else:
             raise TypeError('reliapy: `state_limit_function` must be callable.')
+
+        if callable(limit_state_gradient):
+            self.limit_state_gradient = limit_state_gradient
+        else:
+            self.state_limit_gradient = None
 
         self.X = None
         self.g = None
         self.n_sim = None
         self.n_tasks = n_tasks
+
+    def function(self, X):
+
+        g = self.limit_state_function(X)
+
+        return g
+
+    def gradient(self, X):
+
+        if self.limit_state_gradient is None:
+            dg = numerical_gradient(X, self.limit_state_function)
+
+        else:
+            dg = self.limit_state_gradient(X)
+
+        return dg
 
     def run(self, X=None):
         """
@@ -108,8 +130,7 @@ class LimitState:
         # Run python model
         g = []
         for i in range(n_sim):
-
-            state_lim = self.state_limit_function(X[i])
+            state_lim = self.limit_state_function(X[i])
             g.append(state_lim)
 
         return g

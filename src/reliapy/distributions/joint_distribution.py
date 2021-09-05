@@ -17,6 +17,17 @@ class JointDistribution:
         self.random_state = random_state
         self.decomposition = decomposition
 
+        mean = []
+        std = []
+        for i in range(self.nrv):
+            m = marginal[i].stats[0]
+            s = np.sqrt(marginal[i].stats[1])
+            mean.append(m)
+            std.append(s)
+
+        self.mean = np.array(mean)
+        self.std = np.array(std)
+
     def rvs(self, n_sim=1):
 
         if self.decomposition == 'spectral':

@@ -14,6 +14,8 @@ class MonteCarlo(_Simulation):
         self.random_state = random_state
         self.pf = None
 
+        self.distribution_obj.random_state = random_state
+
         super().__init__(limit_state_obj=limit_state_obj,
                          distribution_obj=distribution_obj,
                          n_sim=n_sim, n_tasks=n_tasks, random_state=random_state)
@@ -24,7 +26,6 @@ class MonteCarlo(_Simulation):
         x = self.distribution_obj.rvs(n_sim=self.n_sim)
         self.limit_state_obj.run(X=x)
         g = self.limit_state_obj.g
-
         num_total = len(g)
         num_failure = sum(I < 0 for I in g)
 
