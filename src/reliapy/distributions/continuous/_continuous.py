@@ -1,9 +1,35 @@
-import scipy as sp
-import numpy as np
 from reliapy._messages import *
 
 
 class _Continuous:
+    """
+    ``_Continuous`` is a parent class (template) for the classes implementing the 1D constinuous distributions.
+
+    **Input:**
+    * **loc** (`float`)
+        Location of the random variable (as in scipy.stats).
+
+    * **scale** (`float`)
+        Scale of the random variable (as in scipy.stats).
+
+     * **random_state** (`float`, `int`)
+        Random seed for the random number generator.
+
+    **Attributes:**
+
+    * **loc** (`float`)
+        Location of the random variable (as in scipy.stats).
+
+    * **scale** (`float`)
+        Scale of the random variable (as in scipy.stats).
+
+    * **random_state** (`float`, `int`)
+        Random seed for the random number generator.
+
+    * **central_moments** (`ndarray`)
+        Array with central moments.
+
+    """
 
     def __init__(self, loc=None, scale=None, random_state=None):
         self.loc = loc

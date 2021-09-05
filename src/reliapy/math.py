@@ -5,18 +5,99 @@ import copy
 
 
 def phi_pdf(X):
+    """
+    Standard normal PDF.
+
+    **Input:**
+    * **X** (`float`)
+        Argument.
+
+    **Output**
+        Standard normal PDF of X.
+    """
     return norm.pdf(X, loc=0, scale=1)
 
 
 def phi_cdf(X):
+    """
+    Standard normal CDF.
+
+    **Input:**
+    * **X** (`float`)
+        Argument.
+
+    **Output**
+        Standard normal CDF of X.
+    """
     return norm.cdf(X, loc=0, scale=1)
 
 
 def phi_icdf(q):
+    """
+    Inverse of the standard normal CDF.
+
+    **Input:**
+    * **q** (`float`)
+        Probability.
+
+    **Output**
+        Inverse value for the standard normal CDF.
+    """
     return norm.ppf(q, loc=0, scale=1)
 
 
+def pf2beta(pf):
+    """
+    Convert pf (probability of failure) into beta (reliability index).
+
+    **Input:**
+    * **pf** (`float`)
+        Probability of failure.
+
+    **Output**
+    * **beta** (`float`)
+        Reliability index.
+    """
+    beta = -norm.ppf(pf, loc=0, scale=1)
+    return beta
+
+
+def beta2pf(beta):
+    """
+    Convert beta (reliability index) into pf (probability of failure).
+
+    **Input:**
+    * **beta** (`float`)
+        Reliability index.
+
+    **Output**
+    * **pf** (`float`)
+        Probability of failure.
+
+    """
+    pf = norm.cdf(-beta, loc=0, scale=1)
+    return pf
+
+
 def normal_equivalent(X, distribution=None):
+    """
+    Get the mean and standard deviation for the equivalent normal distribution.
+
+    **Input:**
+    * **X** (`float`)
+        Argument.
+
+    * **distribution** (`object`)
+        Marginal probability distribution.
+
+    **Output**
+    * **mu_eq** (`float`)
+        Equivalent mean.
+
+    * **std_eq** (`float`)
+        Equivalent standard deviation.
+
+    """
     q = distribution.cdf(X=X)
     z = phi_icdf(q)
     zf = phi_pdf(z)
@@ -29,6 +110,30 @@ def normal_equivalent(X, distribution=None):
 
 
 def transform_xz(X, distributions=None):
+    """
+    Get the Jacobian from X to Z and vice-versa.
+
+    **Input:**
+    * **X** (`float`)
+        Argument.
+
+    * **distribution** (`object`)
+        Marginal probability distribution.
+
+    **Output**
+    * **Jxz** (`ndarray`)
+        Jacobian from Z to X.
+
+    * **Jzx** (`ndarray`)
+        Jacobian from X to Z.
+
+    * **M_eq** (`float`)
+        Array of equivalent means.
+
+    * **D_eq** (`float`)
+        Array of equivalent standard deviations.
+
+    """
     nrv = len(X)
 
     M_eq = []
@@ -100,6 +205,21 @@ def cholesky_decomposition(Cz):
 
 
 def numerical_gradient(X, fun):
+    """
+    Numerical gradient of a given function `fun` using finite differences.
+
+    **Input:**
+    * **X** (`float`)
+        Argument.
+
+    * **fun** (`callable`)
+        Function.
+
+    **Output**
+    * **gradient** (`ndarray`)
+        Gradient of `fun`.
+
+    """
     nrv = len(X)
     h = 1e-6
     gradient = []

@@ -5,7 +5,7 @@ from reliapy.math import numerical_gradient
 
 class LimitState:
     """
-    ``LimitState`` is a class to implement the state limit equations.
+    ``LimitState`` is a class implementing the interface between the state limit function and reliapy.
 
     **Input:**
     * **limit_state_function** (`callable`)
@@ -45,17 +45,35 @@ class LimitState:
         self.n_tasks = n_tasks
 
     def function(self, X):
+        """
+        Get the values of the limit state function.
+
+        **Input:**
+        * **X** (`ndarray`)
+            Samples of a random variable.
+
+        """
 
         g = self.limit_state_function(X)
 
         return g
 
     def gradient(self, X):
+        """
+        Get the gradient of the limit state function either analytically or numerically.
+
+        **Input:**
+        * **X** (`ndarray`)
+            Samples of a random variable.
+
+        """
 
         if self.limit_state_gradient is None:
+            # Get the gradient using finite differences.
             dg = numerical_gradient(X, self.limit_state_function)
 
         else:
+            # Get the analytical gradient.
             dg = self.limit_state_gradient(X)
 
         return dg

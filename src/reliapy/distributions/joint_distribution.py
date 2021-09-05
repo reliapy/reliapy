@@ -5,6 +5,46 @@ from reliapy.math import spectral_decomposition, cholesky_decomposition
 
 
 class JointDistribution:
+    """
+    ``JointDistribution`` is a class implementing the elements of a joint distribution that are useful for reliability.
+
+     **Input:**
+    * **marginal** (`list`)
+        A list of objects of marginal distribution.
+
+    * **correlation** (`ndarray`)
+        Correlation matrix.
+
+    * **random_state** (`float`, `int`)
+        Random seed.
+
+    * **decomposition** (`str`)
+        Decomposition of the correlation method: `spectral` or `cholesky`.
+
+    **Attributes:**
+
+    * **marginal** (`list`)
+        A list of objects of marginal distribution.
+
+    * **correlation** (`ndarray`)
+        Correlation matrix.
+
+    * **nrv** (`int`)
+        Number of random variables.
+
+    * **random_state** (`float`, `int`)
+        Random seed.
+
+    * **decomposition** (`str`)
+        Decomposition of the correlation method: `spectral` or `cholesky`.
+
+    * **mean** (`ndarray`)
+        Array of means.
+
+    * **std** (`ndarray`)
+        Array of standard deviations.
+
+    """
 
     def __init__(self, marginal=None, correlation=None, random_state=None, decomposition='spectral'):
 
@@ -29,6 +69,18 @@ class JointDistribution:
         self.std = np.array(std)
 
     def rvs(self, n_sim=1):
+        """
+        Get random samples from the joint PDF.
+
+        **Input:**
+        * **n_sim** (`float`)
+            Number of samples.
+
+        **Output:**
+        * **x** (`ndarray`)
+            Random samples.
+
+        """
 
         if self.decomposition == 'spectral':
             _, Jzy = spectral_decomposition(self.correlation)
