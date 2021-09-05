@@ -1,5 +1,5 @@
 *******************************************************
-ReliaPy: Structural Risk and Reliability
+ReliaPy: Structural Risk and Reliability with Python
 *******************************************************
 
 .. |logo|
