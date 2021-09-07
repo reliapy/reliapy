@@ -1,7 +1,6 @@
 from reliapy._messages import *
-from scipy.stats import norm
+from scipy.stats._distn_infrastructure import rv_frozen
 import numpy as np
-from reliapy.math import spectral_decomposition, cholesky_decomposition
 
 
 class JointDistribution:

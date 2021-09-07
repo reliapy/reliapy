@@ -50,10 +50,6 @@ class MonteCarlo:
         # set the random state of the ``JointDistribution`` object.
         self.sampling_obj.random_state = random_state
 
-        #super().__init__(limit_state_obj=limit_state_obj,
-        #                 distribution_obj=distribution_obj,
-        #                 n_sim=n_sim, n_tasks=n_tasks, random_state=random_state)
-
     def run(self):
         """
         Run Monte Carlo simulation.

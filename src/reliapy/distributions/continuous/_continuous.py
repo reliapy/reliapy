@@ -31,11 +31,8 @@ class _Continuous:
 
     """
 
-    def __init__(self, loc=None, scale=None, random_state=None):
-        self.loc = loc
-        self.scale = scale
-        self.central_moments = None
-        self.random_state = random_state
+    def __init__(self):
+        pass
 
     def pdf(self, X=None):
         template_error()

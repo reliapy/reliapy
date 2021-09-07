@@ -1,8 +1,8 @@
 from reliapy.distributions.continuous import _Continuous
-from scipy.stats import norm as prob
+from scipy.stats import anglit as prob
 
 
-class Normal(_Continuous):
+class Anglit(_Continuous):
 
     def __init__(self, loc=None, scale=None, random_state=None):
         self.loc = loc
