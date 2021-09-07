@@ -1,8 +1,8 @@
 from reliapy.math import *
-from reliapy.monte_carlo._simulation import _Simulation
+from reliapy.sampling import LHS, Antithetic, Random
 
 
-class MonteCarlo(_Simulation):
+class MonteCarlo:
     """
     ``MonteCarlo`` is a class implementing the crude Monte Carlo simulation, and it is a child class of ``_Simulation``.
 
@@ -38,8 +38,8 @@ class MonteCarlo(_Simulation):
 
     """
 
-    def __init__(self, limit_state_obj=None, distribution_obj=None, n_sim=None, n_tasks=1, random_state=None):
-        self.distribution_obj = distribution_obj
+    def __init__(self, limit_state_obj=None, sampling_obj=None, n_sim=None, n_tasks=1, random_state=None):
+        self.sampling_obj = sampling_obj
         self.n_sim = n_sim
         self.n_tasks = n_tasks
         self.limit_state_obj = limit_state_obj
@@ -48,11 +48,11 @@ class MonteCarlo(_Simulation):
         self.beta = None
 
         # set the random state of the ``JointDistribution`` object.
-        self.distribution_obj.random_state = random_state
+        self.sampling_obj.random_state = random_state
 
-        super().__init__(limit_state_obj=limit_state_obj,
-                         distribution_obj=distribution_obj,
-                         n_sim=n_sim, n_tasks=n_tasks, random_state=random_state)
+        #super().__init__(limit_state_obj=limit_state_obj,
+        #                 distribution_obj=distribution_obj,
+        #                 n_sim=n_sim, n_tasks=n_tasks, random_state=random_state)
 
     def run(self):
         """
@@ -60,16 +60,38 @@ class MonteCarlo(_Simulation):
         """
 
         # Get `n_sim` random samples.
-        x = self.distribution_obj.rvs(n_sim=self.n_sim)
+        if isinstance(self.sampling_obj, LHS) or isinstance(self.sampling_obj, Random):
+            x = self.sampling_obj.rvs(n_sim=self.n_sim)
 
-        # Evaluate the limit state functions for the random samples.
-        self.limit_state_obj.run(X=x)
-        g = self.limit_state_obj.g
+            # Evaluate the limit state functions for the random samples.
+            self.limit_state_obj.run(X=x)
+            g = self.limit_state_obj.g
 
-        # Get the number of samples in the failure domain.
-        num_failure = sum(I < 0 for I in g)
+            # Get the number of samples in the failure domain.
+            num_failure = sum(I < 0 for I in g)
 
-        # Compute the probability of failure.
-        self.pf = num_failure/self.n_sim
+            # Compute the probability of failure.
+            self.pf = num_failure / self.n_sim
+
+        else:
+            x, x_ = self.sampling_obj.rvs(n_sim=self.n_sim)
+
+            # Evaluate the limit state functions for the random samples.
+            self.limit_state_obj.run(X=x)
+            g = self.limit_state_obj.g
+
+            self.limit_state_obj.run(X=x_)
+            g_ = self.limit_state_obj.g
+
+            # Get the number of samples in the failure domain.
+            num_failure = sum(I < 0 for I in g)
+            num_failure_ = sum(I < 0 for I in g_)
+
+            pf = num_failure / self.n_sim
+            pf_ = num_failure_ / self.n_sim
+
+            # Compute the probability of failure.
+            self.pf = (pf + pf_) / 2
+
         self.beta = pf2beta(self.pf)
 
