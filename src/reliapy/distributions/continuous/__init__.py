@@ -3,5 +3,33 @@ from reliapy.distributions.continuous._normal import Normal
 from reliapy.distributions.continuous._alpha import Alpha
 from reliapy.distributions.continuous._anglit import Anglit
 from reliapy.distributions.continuous._arcsine import ArcSine
+from reliapy.distributions.continuous._argus import Argus
+from reliapy.distributions.continuous._beta import Beta
+from reliapy.distributions.continuous._betaprime import BetaPrime
+from reliapy.distributions.continuous._bradford import Bradford
+from reliapy.distributions.continuous._burr import Burr
+from reliapy.distributions.continuous._burr12 import Burr12
+from reliapy.distributions.continuous._cauchy import Cauchy
+from reliapy.distributions.continuous._chi import Chi
+from reliapy.distributions.continuous._chi2 import Chi2
+from reliapy.distributions.continuous._cosine import Cosine
+from reliapy.distributions.continuous._crystalball import Crystalball
+from reliapy.distributions.continuous._dgamma import DGamma
+from reliapy.distributions.continuous._dweibull import DWeibull
+from reliapy.distributions.continuous._erlang import Erlang
+from reliapy.distributions.continuous._expon import Expon
+from reliapy.distributions.continuous._exponnorm import ExponNorm
+from reliapy.distributions.continuous._exponpow import ExponPow
+from reliapy.distributions.continuous._exponweib import ExponWeib
+from reliapy.distributions.continuous._f import F
+from reliapy.distributions.continuous._fatiguelife import FatigueLife
+from reliapy.distributions.continuous._fisk import Fisk
+from reliapy.distributions.continuous._foldcauchy import FoldCauchy
+from reliapy.distributions.continuous._foldnorm import FoldNorm
+from reliapy.distributions.continuous._genlogistic import GenLogistic
+from reliapy.distributions.continuous._gennorm import GenNorm
+from reliapy.distributions.continuous._genpareto import GenPareto
 
 from reliapy.distributions.continuous._continuous import *
+from reliapy.distributions.continuous._normal import *
+

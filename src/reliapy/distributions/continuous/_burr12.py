@@ -2,7 +2,7 @@ from reliapy.distributions.continuous import _Continuous
 from scipy.stats import burr12 as prob
 
 
-class Alpha(_Continuous):
+class Burr12(_Continuous):
 
     def __init__(self, c=None, d=None, loc=None, scale=None, random_state=None):
         self.c = c

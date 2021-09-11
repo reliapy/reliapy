@@ -1,6 +1,3 @@
-from reliapy._messages import *
-from scipy.stats import norm
-import numpy as np
 from reliapy.math import *
 
 

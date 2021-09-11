@@ -1,4 +1,3 @@
-import scipy as sp
 import numpy as np
 import copy
 from reliapy._messages import *

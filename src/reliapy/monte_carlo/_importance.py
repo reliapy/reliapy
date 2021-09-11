@@ -1,6 +1,6 @@
 from reliapy.math import *
 from reliapy.sampling import LHS, Antithetic, Random
-from reliapy.transformation._optimization import Optimization
+from reliapy.transformation import Optimization
 import copy
 
 

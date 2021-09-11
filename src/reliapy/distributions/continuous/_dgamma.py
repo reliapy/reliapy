@@ -2,7 +2,7 @@ from reliapy.distributions.continuous import _Continuous
 from scipy.stats import dgamma as prob
 
 
-class Dgamma(_Continuous):
+class DGamma(_Continuous):
 
     def __init__(self, a=None, loc=None, scale=None, random_state=None):
         self.a = a

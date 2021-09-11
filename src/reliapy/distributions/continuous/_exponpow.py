@@ -4,7 +4,7 @@ from scipy.stats import exponpow as prob
 
 class ExponPow(_Continuous):
 
-    def __init__(self, b=Norm, loc=None, scale=None, random_state=None):
+    def __init__(self, b=None, loc=None, scale=None, random_state=None):
         self.b = b
         self.loc = loc
         self.scale = scale

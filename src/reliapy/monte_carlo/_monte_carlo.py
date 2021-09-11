@@ -1,5 +1,5 @@
 from reliapy.math import *
-from reliapy.sampling import LHS, Antithetic, Random
+from reliapy.sampling import LHS, Random
 
 
 class MonteCarlo:

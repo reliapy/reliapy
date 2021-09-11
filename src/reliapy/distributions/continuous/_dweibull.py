@@ -2,7 +2,7 @@ from reliapy.distributions.continuous import _Continuous
 from scipy.stats import dweibull as prob
 
 
-class Dweibull(_Continuous):
+class DWeibull(_Continuous):
 
     def __init__(self, c=None, loc=None, scale=None, random_state=None):
         self.c = c
