@@ -1,21 +1,115 @@
 import numpy as np
 import scipy as sp
-from scipy.stats import norm
+from scipy.stats import norm, multivariate_normal
+from scipy.stats import multivariate_normal as multi_norm
+import scipy.integrate as si
 import copy
+from reliapy._messages import *
 
 
-def phi_pdf(X):
+def nataf(Cx, max_iter=5, tol=1e-10):
     """
-    Standard normal PDF.
+    Nataf model for the transformation of the correlation matrix from the domain X to Z.
+
+    **Input:**
+    * **Cx** (`ndarray`)
+        Correlation matrix in X.
+
+    * **max_iter** (`int`)
+        Maximum number of iterations.
+
+    * **max_iter** (`int`)
+        Maximum number of iterations.
+
+    * **tol** (`float`)
+        Error tolerance.
+
+    **Output**
+    * **Cz** (`ndarray`)
+        Correlation matrix in Z.
+    """
+    h = 0.000000001
+    rows, cols = np.shape(Cx)
+    Cz = np.eye(rows)
+    for i in np.arange(0, rows):
+        for j in np.arange(i + 1, cols):
+            # initial guess.
+            rho_z = Cx[i, j]
+
+            itera = 0
+            while itera < max_iter:
+                rho_h = rho_z
+                err0 = _func_nataf(rho_h, Cx[i, j])
+
+                if err0 < tol:
+                    break
+
+                rho_h = rho_z + h
+                err1 = _func_nataf(rho_h, Cx[i, j])
+
+                d_rho = (err1 - err0) / h
+                rho_z = rho_z - d_rho
+
+                if rho_z > 1:
+                    rho_z = 1
+                elif rho_z < 0:
+                    rho_z = 0
+
+                itera = itera + 1
+
+            Cz[i, j] = rho_z
+            Cz[j, i] = rho_z
+
+    return Cz
+
+
+def _func_nataf(rho_z, rho_x):
+    """
+    Private method used to find the correlation coefficients in Z.
+
+    **Input:**
+    * **rho_z** (`float`)
+        Correlation coefficent in Z.
+
+    * **rho_x** (`float`)
+        Correlation coefficient in X.
+
+    **Output**
+    * **z** (`float`)
+        Error between the estimated `rho_x` for a given `rho_z` and real value of `rho_x`.
+    """
+    rho_x_, _ = si.dblquad(lambda x, y: x * y * multi_norm.pdf((x, y), cov=[[1, rho_z], [rho_z, 1]]),
+                           -np.inf, np.inf, -np.inf, np.inf)
+
+    z = np.abs(rho_x_ - rho_x) ** 2
+
+    return z
+
+
+def phi_pdf(X, corr=None):
+    """
+    Standard normal PDF/Multivariate pdf.
 
     **Input:**
     * **X** (`float`)
         Argument.
 
+    * **corr** (`ndarray`)
+        Correlation matrix.
+
     **Output**
         Standard normal PDF of X.
     """
-    return norm.pdf(X, loc=0, scale=1)
+    norm_pdf = None
+    if isinstance(X, int) or isinstance(X, float):
+        norm_pdf = norm.pdf(X, loc=0, scale=1)
+    else:
+        if np.trace(corr) != len(X):
+            shape_error(' X or corr ')
+        else:
+            norm_pdf = multivariate_normal.pdf(X, cov=corr)
+
+    return norm_pdf
 
 
 def phi_cdf(X):
@@ -146,8 +240,8 @@ def transform_xz(X, distributions=None):
     M_eq = np.array(M_eq)
     D_eq = np.array(D_eq)
 
-    Jzx = np.diag(D_eq)
-    Jxz = np.diag(np.reciprocal(D_eq))
+    Jxz = np.diag(D_eq)
+    Jzx = np.diag(np.reciprocal(D_eq))
 
     return Jxz, Jzx, M_eq, D_eq
 

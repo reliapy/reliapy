@@ -1,5 +1,5 @@
 from reliapy._messages import *
-from scipy.stats._distn_infrastructure import rv_frozen
+from reliapy.math import phi_pdf, nataf, transform_xz
 import numpy as np
 
 
@@ -45,16 +45,23 @@ class JointDistribution:
 
     """
 
-    def __init__(self, marginal=None, correlation=None, random_state=None, decomposition='spectral'):
+    def __init__(self, marginal=None, Cx=None, random_state=None, decomposition='spectral', correlation_z='approx'):
 
         if not isinstance(marginal, list):
             type_error('distributions', 'list')
 
         self.marginal = marginal
-        self.correlation = correlation
+        self.Cx = Cx
         self.nrv = len(marginal)
         self.random_state = random_state
         self.decomposition = decomposition
+
+        if correlation_z == 'approx':
+            self.Cz = self.Cx
+        elif correlation_z == 'nataf':
+            self.Cz = nataf(self.Cx)
+        else:
+            not_implemented_error()
 
         mean = []
         std = []
@@ -66,3 +73,41 @@ class JointDistribution:
 
         self.mean = np.array(mean)
         self.std = np.array(std)
+
+    def joint_pdf(self, X):
+        """
+        Joint PDF using the Nataf model.
+
+        **Input:**
+        * **X** (`float`)
+            Argument.
+
+        **Output**
+        * **joint_pdf_val** (`float`)
+            Joint PDF for `X`.
+        """
+
+        # Check is the input is consistent with the proabbility distribution.
+        if len(X) != self.nrv:
+            shape_error('X')
+
+        # Get the Jacobians.
+        Jxz, Jzx, M_eq, S_eq = transform_xz(X, distributions=self)
+
+        # Transform the input from X to Z.
+        Z = Jzx @ (X - M_eq)
+
+        # Start the iterative process.
+        f_prod = 1
+        phi_prod = 1
+        for i in range(self.nrv):
+            f = self.marginal[i].pdf(X[i])
+            f_prod = f_prod * f
+
+            phi = phi_pdf(Z[i])
+            phi_prod = phi_prod * phi
+
+        phi_multi = phi_pdf(Z, corr=self.Cz)
+        joint_pdf_val = phi_multi * (f_prod / phi_prod)
+
+        return joint_pdf_val

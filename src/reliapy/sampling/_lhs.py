@@ -50,7 +50,7 @@ class LHS:
             type_error('distributions', 'list')
 
         self.marginal = distribution_obj.marginal
-        self.correlation = distribution_obj.correlation
+        self.Cz = distribution_obj.Cz
         self.nrv = len(distribution_obj.marginal)
         self.random_state = distribution_obj.random_state
         self.decomposition = distribution_obj.decomposition
@@ -82,14 +82,11 @@ class LHS:
         """
 
         if self.decomposition == 'spectral':
-            _, Jzy = spectral_decomposition(self.correlation)
+            _, Jzy = spectral_decomposition(self.Cz)
         elif self.decomposition == 'cholesky':
-            _, Jzy = cholesky_decomposition(self.correlation)
+            _, Jzy = cholesky_decomposition(self.Cz)
         else:
             not_implemented_error()
-
-        #y = norm.rvs(loc=0, scale=1, size=(self.nrv, n_sim), random_state=self.random_state)
-        #z = Jzy @ y
 
         # Get a matrix of random permuations in each column.
         arr = np.arange(1, n_sim+1)
@@ -113,13 +110,13 @@ class LHS:
         for i in range(n_sim):
             u = S[i, :]
 
-            xj0 = []
+            yj0 = []
             for j in range(self.nrv):
-                x_ = phi_icdf(u[j])
+                y_ = phi_icdf(u[j])
 
-                xj0.append(x_)
+                yj0.append(y_)
 
-            zj = Jzy @ xj0
+            zj = Jzy @ yj0
             xj = []
             for j in range(self.nrv):
                 p0 = phi_cdf(zj[j])

@@ -16,7 +16,7 @@ def shape_error(var):
     """
     Error message for variables with wrong shape.
     """
-    raise ValueError('reliapy (Error 2) - the shape of ' + var + ' is not consistent.')
+    raise ValueError('reliapy (Error 2) - the shape of ' + var + ' is/are not consistent.')
 
 
 def not_implemented_error():

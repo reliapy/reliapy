@@ -5,14 +5,14 @@ Reliapy
 
 import pkg_resources
 
-import reliapy.state_limit
+import reliapy.limit_state
 import reliapy.transformation
 import reliapy.distributions.continuous
 import reliapy.monte_carlo
 import reliapy._messages
 import reliapy.sampling
 
-from reliapy.state_limit import *
+from reliapy.limit_state import *
 from reliapy.transformation import *
 from reliapy.distributions.continuous import *
 from reliapy.monte_carlo import *

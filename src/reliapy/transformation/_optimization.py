@@ -226,7 +226,7 @@ class Optimization:
 
         x = mean + y * std
         g = self.limit_state_obj.function(x)
-        m = 0.5 * np.linalg.norm(y) ** 2  + c * abs(g)
+        m = 0.5 * np.linalg.norm(y) ** 2 + c * abs(g)
 
         return m
 

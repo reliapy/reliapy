@@ -1,4 +1,3 @@
-from reliapy._messages import *
 from reliapy.transformation._optimization import Optimization
 from reliapy.math import *
 
@@ -77,14 +76,13 @@ class FORM(Optimization):
 
         * **max_iter** (`float`)
             Maximum number of iterations.
-
         """
 
         # Get the Jacobians between Y and Z (and vice-versa).
         if self.decomposition == 'spectral':
-            Jyz, Jzy = spectral_decomposition(self.distribution_obj.correlation)
+            Jyz, Jzy = spectral_decomposition(self.distribution_obj.Cz)
         elif self.decomposition == 'cholesky':
-            Jyz, Jzy = cholesky_decomposition(self.distribution_obj.correlation)
+            Jyz, Jzy = cholesky_decomposition(self.distribution_obj.Cz)
         else:
             not_implemented_error()
 

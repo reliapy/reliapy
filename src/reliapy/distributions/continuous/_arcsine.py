@@ -2,7 +2,7 @@ from reliapy.distributions.continuous import _Continuous
 from scipy.stats import arcsine as prob
 
 
-class Arcsine(_Continuous):
+class ArcSine(_Continuous):
 
     def __init__(self, loc=None, scale=None, random_state=None):
         self.loc = loc

@@ -44,8 +44,9 @@ class Random:
         if not isinstance(distribution_obj.marginal, list):
             type_error('distributions', 'list')
 
+        self.distribution_obj = distribution_obj
         self.marginal = distribution_obj.marginal
-        self.correlation = distribution_obj.correlation
+        self.Cz = distribution_obj.Cz
         self.nrv = len(distribution_obj.marginal)
         self.random_state = distribution_obj.random_state
         self.decomposition = distribution_obj.decomposition
@@ -76,9 +77,9 @@ class Random:
         """
 
         if self.decomposition == 'spectral':
-            _, Jzy = spectral_decomposition(self.correlation)
+            _, Jzy = spectral_decomposition(self.Cz)
         elif self.decomposition == 'cholesky':
-            _, Jzy = cholesky_decomposition(self.correlation)
+            _, Jzy = cholesky_decomposition(self.Cz)
         else:
             not_implemented_error()
 
