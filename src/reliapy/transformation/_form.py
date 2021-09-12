@@ -90,6 +90,39 @@ class FORM(Optimization):
         mean = self.distribution_obj.mean
         # std = self.distribution_obj.std
 
+        # Check if it is a system or not.
+        g_mean = self.limit_state_obj.function(mean)
+        if isinstance(g_mean, tuple):
+            n_lse = len(g_mean) - 1
+        elif isinstance(g_mean, float):
+            n_lse = 1
+        else:
+            not_implemented_error()
+
+        # Start the iteration guessing the design point.
+        if n_lse == 1:
+            y = self._iteration_form(mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
+                                     sys=False, sys_id=None)
+
+            beta = np.linalg.norm(y)
+            pf = beta2pf(beta)
+
+        else:
+
+            beta = []
+            pf = []
+            for k in range(n_lse):
+                y = self._iteration_form(mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
+                                         sys=True, sys_id=k)
+
+                beta.append(np.linalg.norm(y))
+                pf.append(beta2pf(np.linalg.norm(y)))
+
+        self.beta = beta
+        self.pf = pf
+
+    def _iteration_form(self, mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz, sys, sys_id):
+
         # nrv = self.distribution_obj.nrv
         x = mean
         itera = 0
@@ -111,9 +144,12 @@ class FORM(Optimization):
 
             # Find the next point y.
             if self.optimization == 'iHLRF':
-                y = self.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter)
+                y = self.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter,
+                               sys_id=sys_id)
+
             elif self.optimization == 'HLRF':
-                y = self.HLRF(tol, max_iter)
+                y = self.HLRF(tol, max_iter, sys_id)
+
             else:
                 not_implemented_error()
 
@@ -121,8 +157,19 @@ class FORM(Optimization):
             x = Jxy @ y + M_eq
 
             # Evaluate g(y) and its gradient.
-            gy = self.limit_state_obj.function(x)
-            dgdx = self.limit_state_obj.gradient(x)
+            if sys:
+                gy_ = self.limit_state_obj.function(x)
+                dgdx_ = self.limit_state_obj.gradient(x)
+                gy = gy_[sys_id + 1]
+                dgdx = dgdx_[sys_id]
+
+            else:
+                gy = self.limit_state_obj.function(x)
+                dgdx = self.limit_state_obj.gradient(x)
+
+            # gy = self.limit_state_obj.function(x)
+            # dgdx = self.limit_state_obj.gradient(x)
+
             dgdy = Jxy.T @ dgdx
 
             # Compute the errors.
@@ -134,6 +181,5 @@ class FORM(Optimization):
 
             itera = itera + 1
 
-        self.beta = np.linalg.norm(y)
-        self.pf = beta2pf(self.beta)
+        return y
 

@@ -101,6 +101,14 @@ class Importance:
         else:
             not_implemented_error()
 
+        if isinstance(y_design, tuple):
+            # n_lse = len(y_design)
+            not_implemented_error()
+        elif isinstance(y_design, float):
+            n_lse = 1
+        else:
+            not_implemented_error()
+
         # Get the Jacobian for the transformation between Z and Y, and vice-versa.
         if self.sampling_obj.distribution_obj.decomposition == 'spectral':
             _, Jzy = spectral_decomposition(self.sampling_obj.distribution_obj.Cz)

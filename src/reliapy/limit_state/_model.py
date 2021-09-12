@@ -1,5 +1,6 @@
 import numpy as np
 from reliapy.math import numerical_gradient
+from reliapy._messages import *
 # from multiprocessing import Pool
 
 
@@ -39,9 +40,15 @@ class LimitState:
         else:
             self.state_limit_gradient = None
 
+        # if not isinstance(n_lse, int):
+        #     type_error('n_lse', 'int')
+        # elif n_lse < 1:
+        #     value_error('n_lse')
+
         self.X = None
         self.g = None
         self.n_sim = None
+        # self.n_lse = n_lse
         self.n_tasks = n_tasks
 
     def function(self, X):
@@ -52,6 +59,9 @@ class LimitState:
         * **X** (`ndarray`)
             Samples of a random variable.
 
+        * **Output:**
+        * **g** (`float` ot `tuple`)
+            Value of the limit state function.
         """
 
         g = self.limit_state_function(X)
@@ -66,6 +76,9 @@ class LimitState:
         * **X** (`ndarray`)
             Samples of a random variable.
 
+        * **Output:**
+        * **dg** (`ndarray` ot `tuple`)
+            Gradient of the limit state function.
         """
 
         if self.limit_state_gradient is None:

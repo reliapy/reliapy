@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='reliapy',
-    version="1.0.0",
+    version="1.1.0",
     url='https://github.com/reliapy/reliapy',
     description="Structural Risk and Reliability with Python.",
     author="Ketson R. M. dos Santos",

@@ -29,7 +29,7 @@ class Optimization:
         self.distribution_obj = distribution_obj
         self.limit_state_obj = limit_state_obj
 
-    def HLRF(self, tol=1e-3, max_iter=20):
+    def HLRF(self, tol=1e-3, max_iter=20, sys_id=None):
         """
         Hassofer-Lind-Rackwitz-Fiessler (HLRF) algorithm.
 
@@ -39,6 +39,9 @@ class Optimization:
 
         * **max_iter** (`float`)
             Maximum number of iterations.
+
+        * **sys_id** (`int`)
+            Limit state equation identifier.
 
         **Output:**
         * **y** (`ndarray`)
@@ -56,6 +59,28 @@ class Optimization:
         mean = self.distribution_obj.mean
         std = self.distribution_obj.std
 
+        # Check if it is a system or not.
+        g_mean = self.limit_state_obj.function(mean)
+        if isinstance(g_mean, tuple):
+            n_lse = len(g_mean) - 1
+            if sys_id < 0 or sys_id > n_lse - 1:
+                value_error('sys_id')
+
+        elif isinstance(g_mean, float):
+            n_lse = 1
+        else:
+            not_implemented_error()
+
+        # Start the iteration guessing the design point.
+        if n_lse == 1:
+            y = self._iteration_HLRF(mean, std, max_iter, tol, sys=False, sys_id=None)
+        else:
+            y = self._iteration_HLRF(mean, std, max_iter, tol, sys=True, sys_id=sys_id)
+
+        return y
+
+    def _iteration_HLRF(self, mean, std, max_iter, tol, sys, sys_id):
+
         # Start the iteration guessing the design point.
         y = np.zeros(len(mean))
         error = 10000
@@ -69,9 +94,17 @@ class Optimization:
             # This is the Jacobian used to transform the gradient from X to Y.
             dxdy = std
 
-            g = self.limit_state_obj.function(x)
-            dgdx = self.limit_state_obj.gradient(x)
-            dgdy = dgdx * dxdy
+            if sys:
+                g_ = self.limit_state_obj.function(x)
+                dgdx_ = self.limit_state_obj.gradient(x)
+                g = g_[sys_id + 1]
+                dgdx = dgdx_[sys_id]
+                dgdy = dgdx * dxdy
+
+            else:
+                g = self.limit_state_obj.function(x)
+                dgdx = self.limit_state_obj.gradient(x)
+                dgdy = dgdx * dxdy
 
             # Compute the step of the design point in Y.
             c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
@@ -81,7 +114,7 @@ class Optimization:
 
         return y
 
-    def iHLRF(self, a=0.1, b=0.5, gamma=2, tol=1e-3, tol_1=1e-3, tol_2=1e-3, max_iter=20):
+    def iHLRF(self, a=0.1, b=0.5, gamma=2, tol=1e-3, tol_1=1e-3, tol_2=1e-3, max_iter=20, sys_id=None):
         """
         Improved Hassofer-Lind-Rackwitz-Fiessler (iHLRF) algorithm.
 
@@ -106,6 +139,9 @@ class Optimization:
 
         * **max_iter** (`float`)
             Maximum number of iterations.
+
+        * **sys_id** (`int`)
+            Limit state equation identifier.
 
         **Output:**
         * **y** (`ndarray`)
@@ -135,11 +171,41 @@ class Optimization:
         mean = self.distribution_obj.mean
         std = self.distribution_obj.std
 
-        y = np.ones(len(mean))
+        # Check if it is a system or not.
+        g_mean = self.limit_state_obj.function(mean)
+        if isinstance(g_mean, tuple):
+            n_lse = len(g_mean) - 1
+        elif isinstance(g_mean, float):
+            n_lse = 1
+        else:
+            not_implemented_error()
 
+        if sys_id < 0 or sys_id > n_lse - 1:
+            value_error('sys_id')
+
+        # Start the iteration guessing the design point.
+        if n_lse == 0:
+            y = self._iteration_iHLRF(mean, std, max_iter, tol_1, tol_2, tol, gamma, a, b, sys=False, sys_id=None)
+
+        else:
+            y = self._iteration_iHLRF(mean, std, max_iter, tol_1, tol_2, tol, gamma, a, b, sys=True, sys_id=sys_id)
+
+        return y
+
+    def _iteration_iHLRF(self, mean, std, max_iter, tol_1, tol_2, tol, gamma, a, b, sys, sys_id):
+
+        y = np.ones(len(mean))
         # Set `tol_2` according to the size of g0.
         x0 = mean + y * std
-        g0 = self.limit_state_obj.function(x0)
+
+        if sys:
+            g0_ = self.limit_state_obj.function(x0)
+            g0 = g0_[sys_id + 1]
+
+        else:
+            g0 = self.limit_state_obj.function(x0)
+
+        # g0 = self.limit_state_obj.function(x0)
         tol_2 = tol_2 * abs(g0)
 
         # Start iterations.
@@ -153,9 +219,17 @@ class Optimization:
             # This is the Jacobian used to transform the gradient from X to Y.
             dxdy = std
 
-            g = self.limit_state_obj.function(x)
-            dgdx = self.limit_state_obj.gradient(x)
-            dgdy = dgdx * dxdy
+            if sys:
+                g_ = self.limit_state_obj.function(x)
+                dgdx_ = self.limit_state_obj.gradient(x)
+                g = g_[sys_id + 1]
+                dgdx = dgdx_[sys_id]
+                dgdy = dgdx * dxdy
+
+            else:
+                g = self.limit_state_obj.function(x)
+                dgdx = self.limit_state_obj.gradient(x)
+                dgdy = dgdx * dxdy
 
             # Get the errors.
             error_1 = 1 - abs(np.dot(dgdy, y)) / (np.linalg.norm(dgdy) * np.linalg.norm(y))
@@ -172,6 +246,7 @@ class Optimization:
                 v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
                 v1 = 0.5 * (np.linalg.norm(y + dk) ** 2) / abs(g)
                 ck = gamma * max(v0, v1)
+
             else:
                 v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
                 ck = gamma * v0
@@ -180,11 +255,11 @@ class Optimization:
             n = 0
             while True:
                 y0 = y + (b ** n) * dk
-                m0 = self._merit(y0, ck, mean, std)
-                m1 = self._merit(y, ck, mean, std)
+                m0 = self._merit(y0, ck, mean, std, sys, sys_id)
+                m1 = self._merit(y, ck, mean, std, sys, sys_id)
                 dm = m0 - m1
 
-                gm = self._grad_merit(y, ck, mean, std)
+                gm = self._grad_merit(y, ck, mean, std, sys, sys_id)
                 dgm = -a * (b ** n) * np.linalg.norm(gm)
 
                 if dm <= dgm:
@@ -200,7 +275,7 @@ class Optimization:
 
         return y
 
-    def _merit(self, y, c, mean, std):
+    def _merit(self, y, c, mean, std, sys, sys_id):
         """
         Merit function used in the Armijo's rule, and defined by Zhang and Kiureghian (1997).
 
@@ -224,12 +299,20 @@ class Optimization:
         """
 
         x = mean + y * std
-        g = self.limit_state_obj.function(x)
+        # g = self.limit_state_obj.function(x)
+
+        if sys:
+            g_ = self.limit_state_obj.function(x)
+            g = g_[sys_id + 1]
+
+        else:
+            g = self.limit_state_obj.function(x)
+
         m = 0.5 * np.linalg.norm(y) ** 2 + c * abs(g)
 
         return m
 
-    def _grad_merit(self, y, c, mean, std):
+    def _grad_merit(self, y, c, mean, std, sys, sys_id):
         """
         Gradient of the merit function used in the Armijo's rule, and defined by Zhang and Kiureghian (1997).
 
@@ -258,11 +341,11 @@ class Optimization:
         for i in range(nrv):
             y0 = copy.copy(y)
             y0[i] = y0[i] + h
-            f0 = self._merit(y0, c, mean, std)
+            f0 = self._merit(y0, c, mean, std, sys, sys_id)
 
             y1 = copy.copy(y)
             y1[i] = y1[i] - h
-            f1 = self._merit(y1, c, mean, std)
+            f1 = self._merit(y1, c, mean, std, sys, sys_id)
 
             df = (f0 - f1) / (2 * h)
             gradient.append(df)

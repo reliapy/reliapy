@@ -21,7 +21,7 @@ ReliaPy: Structural Risk and Reliability with Python
 
 :Authors: Ketson R. M. dos Santos
 :Contact: ketson.santos@epfl.ch
-:Version: 1.0.0
+:Version: 1.1.0
 
 
 Description
