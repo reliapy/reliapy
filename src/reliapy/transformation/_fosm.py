@@ -1,6 +1,7 @@
-from reliapy.math import *
 import numpy as np
+
 from reliapy._messages import *
+from reliapy.math import *
 from reliapy.transformation._optimization import Optimization
 
 
@@ -154,7 +155,6 @@ class FOSM(Optimization):
             else:
                 gy = self.limit_state_obj.function(x)
                 dgdx = self.limit_state_obj.gradient(x)
-
 
             # gy = self.limit_state_obj.function(x)
             # dgdx = self.limit_state_obj.gradient(x)

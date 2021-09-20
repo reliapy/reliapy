@@ -104,7 +104,7 @@ class Importance:
         if isinstance(y_design, tuple):
             # n_lse = len(y_design)
             not_implemented_error()
-        elif isinstance(y_design, float):
+        elif isinstance(y_design, np.ndarray):
             n_lse = 1
         else:
             not_implemented_error()

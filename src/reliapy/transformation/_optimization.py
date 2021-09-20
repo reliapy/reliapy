@@ -177,14 +177,17 @@ class Optimization:
             n_lse = len(g_mean) - 1
         elif isinstance(g_mean, float):
             n_lse = 1
+            sys_id = None
         else:
             not_implemented_error()
 
-        if sys_id < 0 or sys_id > n_lse - 1:
+        if sys_id is None:
+            pass
+        elif sys_id < 0 or sys_id > n_lse - 1:
             value_error('sys_id')
 
         # Start the iteration guessing the design point.
-        if n_lse == 0:
+        if n_lse == 1:
             y = self._iteration_iHLRF(mean, std, max_iter, tol_1, tol_2, tol, gamma, a, b, sys=False, sys_id=None)
 
         else:
