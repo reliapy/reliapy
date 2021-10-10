@@ -101,15 +101,6 @@ class Importance:
         form_obj.run()
         y_design = form_obj.design_point_y
 
-        # Find the design point.
-        #if self.optimization == 'iHLRF':
-        #    y_design = self.opt_obj.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter)
-        #elif self.optimization == 'HLRF':
-        #    y_design = self.opt_obj.HLRF(tol, max_iter)
-        #else:
-        #    not_implemented_error()
-
-        # [-0.2392587  -3.07566903  1.11170075]
         if isinstance(y_design, tuple):
             # n_lse = len(y_design)
             not_implemented_error()

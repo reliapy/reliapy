@@ -66,7 +66,7 @@ class MonteCarlo:
             if isinstance(g[0], tuple):
                 n_lse = len(g) - 1
                 system = True
-            elif isinstance(g, float):
+            elif isinstance(g[0], float):
                 n_lse = 1
                 system = False
             else:

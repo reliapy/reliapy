@@ -107,8 +107,6 @@ class Optimization:
                 dgdy = dgdx * dxdy
 
             # Compute the step of the design point in Y.
-            # c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
-            # y = c * dgdy
             y = self.update_HLRF(y, g, dgdy)
 
             error = np.linalg.norm(y - y_before)
