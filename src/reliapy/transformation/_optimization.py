@@ -107,10 +107,20 @@ class Optimization:
                 dgdy = dgdx * dxdy
 
             # Compute the step of the design point in Y.
-            c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
-            y = c * dgdy
+            # c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
+            # y = c * dgdy
+            y = self.update_HLRF(y, g, dgdy)
+
             error = np.linalg.norm(y - y_before)
             itera = itera + 1
+
+        return y
+
+    @staticmethod
+    def update_HLRF(y, gy, dgdy):
+
+        c = (np.dot(dgdy, y) - gy) / (np.linalg.norm(dgdy) ** 2)
+        y = c * dgdy
 
         return y
 
@@ -242,39 +252,77 @@ class Optimization:
                 break
 
             # Adjust the steps.
-            c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
-            dk = c * dgdy - y
+            #c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
+            #dk = c * dgdy - y
+            #
+            #if error_2 >= tol_2:
+            #    v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
+            #    v1 = 0.5 * (np.linalg.norm(y + dk) ** 2) / abs(g)
+            #    ck = gamma * max(v0, v1)
+            #
+            #else:
+            #    v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
+            #    ck = gamma * v0
+            #
+            ## Start the linear search using the Armijo's rule (Luenberger, 1986) using the merit function `_merit`.
+            #n = 0
+            #while True:
+            #    y0 = y + (b ** n) * dk
+            #    m0 = self._merit(y0, ck, mean, std, sys, sys_id)
+            #    m1 = self._merit(y, ck, mean, std, sys, sys_id)
+            #    dm = m0 - m1
+            #
+            #    gm = self._grad_merit(y, ck, mean, std, sys, sys_id)
+            #    dgm = -a * (b ** n) * np.linalg.norm(gm)
+            #
+            #    if dm <= dgm:
+            #        break
+            #
+            #    n = n + 1
+            #
+            #y = y + (b ** n) * dk
 
-            if error_2 >= tol_2:
-                v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
-                v1 = 0.5 * (np.linalg.norm(y + dk) ** 2) / abs(g)
-                ck = gamma * max(v0, v1)
+            y = self.update_iHLRF(y, g, dgdy, gamma, a, b, mean, std, sys, sys_id, tol)
 
-            else:
-                v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
-                ck = gamma * v0
-
-            # Start the linear search using the Armijo's rule (Luenberger, 1986) using the merit function `_merit`.
-            n = 0
-            while True:
-                y0 = y + (b ** n) * dk
-                m0 = self._merit(y0, ck, mean, std, sys, sys_id)
-                m1 = self._merit(y, ck, mean, std, sys, sys_id)
-                dm = m0 - m1
-
-                gm = self._grad_merit(y, ck, mean, std, sys, sys_id)
-                dgm = -a * (b ** n) * np.linalg.norm(gm)
-
-                if dm <= dgm:
-                    break
-
-                n = n + 1
-
-            y = y + (b ** n) * dk
             error = np.linalg.norm(y - y_before)
             if error < tol:
                 break
+
             itera = itera + 1
+
+        return y
+
+    def update_iHLRF(self, y, g, dgdy, gamma, a, b, mean, std, sys, sys_id, tol):
+
+        c = (np.dot(dgdy, y) - g) / (np.linalg.norm(dgdy) ** 2)
+        dk = c * dgdy - y
+
+        if np.linalg.norm(g) >= tol:
+            v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
+            v1 = 0.5 * (np.linalg.norm(y + dk) ** 2) / abs(g)
+            ck = gamma * max(v0, v1)
+
+        else:
+            v0 = np.linalg.norm(y) / np.linalg.norm(dgdy)
+            ck = gamma * v0
+
+        # Start the linear search using the Armijo's rule (Luenberger, 1986) using the merit function `_merit`.
+        n = 0
+        while True:
+            y0 = y + (b ** n) * dk
+            m0 = self._merit(y0, ck, mean, std, sys, sys_id)
+            m1 = self._merit(y, ck, mean, std, sys, sys_id)
+            dm = m0 - m1
+
+            gm = self._grad_merit(y, ck, mean, std, sys, sys_id)
+            dgm = -a * (b ** n) * np.linalg.norm(gm)
+
+            if dm <= dgm:
+                break
+
+            n = n + 1
+
+        y = y + (b ** n) * dk
 
         return y
 

@@ -63,8 +63,26 @@ class MonteCarlo:
             self.limit_state_obj.run(X=x)
             g = self.limit_state_obj.g
 
+            if isinstance(g[0], tuple):
+                n_lse = len(g) - 1
+                system = True
+            elif isinstance(g, float):
+                n_lse = 1
+                system = False
+            else:
+                not_implemented_error()
+
             # Get the number of samples in the failure domain.
-            num_failure = sum(I < 0 for I in g)
+            if system:
+                g = np.array(g)
+                num_failure = 0
+                for i in range(self.n_sim):
+
+                    if g[i, 0] < 0:
+                        num_failure = num_failure + 1
+
+            else:
+                num_failure = sum(I < 0 for I in g)
 
             # Compute the probability of failure.
             self.pf = num_failure / self.n_sim

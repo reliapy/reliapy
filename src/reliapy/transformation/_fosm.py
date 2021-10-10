@@ -44,6 +44,8 @@ class FOSM(Optimization):
         self.optimization = optimization
         self.pf = None
         self.beta = None
+        self.design_point_x = None
+        self.design_point_y = None
 
         super().__init__(limit_state_obj=limit_state_obj, distribution_obj=distribution_obj)
 
@@ -93,24 +95,32 @@ class FOSM(Optimization):
 
         # Start the iterative problem setting x equal to the mean of the random variables.
         if n_lse == 1:
-            y = self._iteration_fosm(mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jxy,
+            y, x = self._iteration_fosm(mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jxy,
                                      sys=False, sys_id=None)
 
             beta = np.linalg.norm(y)
             pf = beta2pf(beta)
+            design_point_y = y
+            design_point_x = x
 
         else:
             beta = []
             pf = []
+            design_point_x = []
+            design_point_y = []
             for k in range(n_lse):
                 y = self._iteration_fosm(mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jxy,
                                          sys=True, sys_id=k)
 
                 beta.append(np.linalg.norm(y))
                 pf.append(beta2pf(np.linalg.norm(y)))
+                design_point_y.append(y)
+                design_point_x.append(x)
 
         self.beta = beta
         self.pf = pf
+        self.design_point_y = design_point_y
+        self.design_point_x = design_point_x
 
     def _iteration_fosm(self, mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jxy, sys, sys_id):
 
@@ -119,25 +129,24 @@ class FOSM(Optimization):
         while itera < max_iter:
 
             # Evaluate the limit state function and its gradient in X.
-            # gx = self.limit_state_obj.function(x)  # todo: use of gx.
+            gy = self.limit_state_obj.function(x)
             dgdx = self.limit_state_obj.gradient(x)
 
             # Transform the point from X to Y
             y = (x - mean) / std
 
             # Transform the gradient from X to Y.
-            # dgdy = Jxy.T @ dgdx  # todo: used to estimate alpha.
+            dgdy = Jxy.T @ dgdx
 
             # Get the sensitivity indexes.
             # alpha = dgdy / np.linalg.norm(dgdy)  # todo: use of the alpha for eliminating some variables.
 
             # Get the next point y.
             if self.optimization == 'iHLRF':
-                y = self.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter,
-                               sys_id=sys_id)
+                y = self.update_iHLRF(y, gy, dgdy, gamma, a, b, mean, std, sys, sys_id, tol_)
 
             elif self.optimization == 'HLRF':
-                y = self.HLRF(tol, max_iter, sys_id)
+                y = self.update_HLRF(y, gy, dgdy)
 
             else:
                 not_implemented_error()
@@ -169,4 +178,4 @@ class FOSM(Optimization):
 
             itera = itera + 1
 
-        return y
+        return y, x

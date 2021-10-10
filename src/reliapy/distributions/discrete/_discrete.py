@@ -1,9 +1,9 @@
 from reliapy._messages import *
 
 
-class _Continuous:
+class _Discrete:
     """
-    ``_Continuous`` is a parent class (template) for the classes implementing the 1D continuous distributions.
+    ``_Discrete`` is a parent class (template) for the classes implementing the 1D discrete distributions.
 
     **Input:**
     * **loc** (`float`)
@@ -34,16 +34,13 @@ class _Continuous:
     def __init__(self):
         pass
 
-    def pdf(self, X=None):
+    def pmf(self, X=None):
         template_error()
 
     def cdf(self, X=None):
         template_error()
 
     def icdf(self, X=None):
-        template_error()
-
-    def moment(self, n=1):
         template_error()
 
     def rvs(self, n_sim=1):

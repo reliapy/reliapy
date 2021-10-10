@@ -38,7 +38,7 @@ class LimitState:
         if callable(limit_state_gradient):
             self.limit_state_gradient = limit_state_gradient
         else:
-            self.state_limit_gradient = None
+            self.limit_state_gradient = None
 
         # if not isinstance(n_lse, int):
         #     type_error('n_lse', 'int')

@@ -5,6 +5,7 @@ from scipy.stats import multivariate_normal as multi_norm
 import scipy.integrate as si
 import copy
 from reliapy._messages import *
+import sys
 
 
 def nataf(Cx, max_iter=5, tol=1e-10):
@@ -314,19 +315,56 @@ def numerical_gradient(X, fun):
         Gradient of `fun`.
 
     """
+
+    g = fun(X)
+    if isinstance(g, tuple):
+        n_lse = len(g) - 1
+        system = True
+    elif isinstance(g, float):
+        n_lse = 1
+        system = False
+    else:
+        not_implemented_error()
+
     nrv = len(X)
     h = 1e-6
     gradient = []
-    for i in range(nrv):
-        x0 = copy.copy(X)
-        x0[i] = x0[i] + h
-        f0 = fun(x0)
+    if system:
 
-        x1 = copy.copy(X)
-        x1[i] = x1[i] - h
-        f1 = fun(x1)
+        for k in range(n_lse):
 
-        df = (f0 - f1) / (2 * h)
-        gradient.append(df)
+            df = []
+            for i in range(nrv):
+
+                x0 = copy.copy(X)
+                x0[i] = x0[i] + h
+                f0 = fun(x0)
+                f0 = f0[k + 1]
+
+                x1 = copy.copy(X)
+                x1[i] = x1[i] - h
+                f1 = fun(x1)
+                f1 = f1[k + 1]
+
+                df_ = (f0 - f1) / (2 * h)
+                df.append(df_)
+
+            gradient.append(df)
+
+    else:
+
+        for i in range(nrv):
+
+            x0 = copy.copy(X)
+            x0[i] = x0[i] + h
+            f0 = fun(x0)
+
+            x1 = copy.copy(X)
+            x1[i] = x1[i] - h
+            f1 = fun(x1)
+
+            df = (f0 - f1) / (2 * h)
+
+            gradient.append(df)
 
     return gradient

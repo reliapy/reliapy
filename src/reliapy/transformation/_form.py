@@ -48,6 +48,8 @@ class FORM(Optimization):
         self.decomposition = decomposition
         self.pf = None
         self.beta = None
+        self.design_point_x = None
+        self.design_point_y = None
 
         super().__init__(limit_state_obj=limit_state_obj, distribution_obj=distribution_obj)
 
@@ -88,7 +90,7 @@ class FORM(Optimization):
 
         # Get the array with the means of the random variables.
         mean = self.distribution_obj.mean
-        # std = self.distribution_obj.std
+        std = self.distribution_obj.std
 
         # Check if it is a system or not.
         g_mean = self.limit_state_obj.function(mean)
@@ -101,33 +103,46 @@ class FORM(Optimization):
 
         # Start the iteration guessing the design point.
         if n_lse == 1:
-            y = self._iteration_form(mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
-                                     sys=False, sys_id=None)
+            y, x = self._iteration_form(mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
+                                        sys=False, sys_id=None)
 
             beta = np.linalg.norm(y)
             pf = beta2pf(beta)
+            design_point_y = y
+            design_point_x = x
 
         else:
 
             beta = []
             pf = []
+            design_point_y = []
+            design_point_x = []
             for k in range(n_lse):
-                y = self._iteration_form(mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
-                                         sys=True, sys_id=k)
+                y, x = self._iteration_form(mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz,
+                                            sys=True, sys_id=k)
 
                 beta.append(np.linalg.norm(y))
                 pf.append(beta2pf(np.linalg.norm(y)))
+                design_point_y.append(y)
+                design_point_x.append(x)
 
         self.beta = beta
         self.pf = pf
+        self.design_point_y = design_point_y
+        self.design_point_x = design_point_x
 
-    def _iteration_form(self, mean, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz, sys, sys_id):
+    def _iteration_form(self, mean, std, a, b, gamma, tol, tol_1, tol_2, max_iter, Jzy, Jyz, sys, sys_id):
 
         # nrv = self.distribution_obj.nrv
         x = mean
+        g0 = self.limit_state_obj.function(x)
+
+        if sys:
+            g0 = g0[sys_id + 1]
+
+        tol_ = tol * np.linalg.norm(g0)
         itera = 0
         while itera < max_iter:
-
             # Get the jacobians between X and Y (and vice versa) using the composition scheme.
             Jxz, Jzx, M_eq, S_eq = transform_xz(x, distributions=self.distribution_obj)
             Jxy = Jxz @ Jzy
@@ -137,21 +152,35 @@ class FORM(Optimization):
             y = Jyx @ (x - M_eq)
 
             # Get the sensitive indexes. (Not currently used. This can change in the future)
-            # gx = self.limit_state_obj.function(x)
-            # dgdx = self.limit_state_obj.gradient(x)
-            # dgdy = Jxy.T @ dgdx
+            if sys:
+                gy = self.limit_state_obj.function(x)
+                gy = gy[sys_id + 1]
+                dgdx = self.limit_state_obj.gradient(x)
+                dgdx = dgdx[sys_id]
+
+            else:
+                gy = self.limit_state_obj.function(x)
+                dgdx = self.limit_state_obj.gradient(x)
+
+            dgdy = Jxy.T @ dgdx
             # alpha = dgdy / np.linalg.norm(dgdy)
 
-            # Find the next point y.
+            # Update y.
             if self.optimization == 'iHLRF':
-                y = self.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter,
-                               sys_id=sys_id)
+                # y = self.iHLRF(a=a, b=b, gamma=gamma, tol=tol, tol_1=tol_1, tol_2=tol_2, max_iter=max_iter,
+                #               sys_id=sys_id)
+
+                y = self.update_iHLRF(y, gy, dgdy, gamma, a, b, mean, std, sys, sys_id, tol_)
 
             elif self.optimization == 'HLRF':
-                y = self.HLRF(tol, max_iter, sys_id)
+                # y = self.HLRF(tol, max_iter, sys_id)
+                y = self.update_HLRF(y, gy, dgdy)
 
             else:
                 not_implemented_error()
+
+            #c = (np.dot(dgdy, y) - gy) / (np.linalg.norm(dgdy) ** 2)
+            #y = c * dgdy
 
             # Transform y from Y to X.
             x = Jxy @ y + M_eq
@@ -181,5 +210,5 @@ class FORM(Optimization):
 
             itera = itera + 1
 
-        return y
+        return y, x
 
